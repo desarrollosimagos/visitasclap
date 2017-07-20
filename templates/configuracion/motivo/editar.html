@@ -1,0 +1,91 @@
+{% extends "base.html" %} <!-- Heredando (Bloque) plantilla index -->
+{% block title %} {% endblock %}
+
+{% block contenido %}
+		
+<html>
+<head>
+    <title>Editar Modelos</title>
+</head>
+<script type="text/javascript">
+$(document).ready(function(){
+
+    $('input').on({
+		keypress: function() {
+			$(this).parent('div').removeClass('has-error');
+		}
+    });
+    
+    $('#motivo').alpha({allow:"- "}); //Valida solo valores numericos y texto
+    
+    
+    $('#registrar_mod').click(function(e) {
+		e.preventDefault();
+		var id = $('#id_r').val()
+		
+		 if (($('#motivo').val().trim() == '')) {
+			bootbox.alert("Debe indicar el Modelo de la Canaima", function() {
+				$('#motivo').parent('div').addClass('has-error'); // colocar class has-error de boostrap
+				$('#motivo').focus()  
+			});
+		}
+		else{
+			$.post('',$('#form_modelo').serialize()+'&bandera=true'+'&id='+id,function(response){
+				if (response == 'existe') {
+					bootbox.alert("Este Modelo ya esta registrada", function() {
+						$('#motivo').parent('div').addClass('has-error'); // colocar class has-error de boostrap
+						$('#motivo').focus()
+					});
+				}else{
+				   $('#form_modelo').submit(); 
+				}
+			});
+		}
+	});
+
+});
+
+</script>
+
+
+<body>
+    <form method="post" id="form_modelo" enctype="multipart/form-data">
+	{% csrf_token %}
+	<div style="width: 100%;text-transform:uppercase;box-shadow: 0 1px 5px rgba(0,0,0,.85)" onkeyup="javascript:this.value=this.value.toUpperCase();" class="panel panel-primary">
+		<div class="panel-heading text-center">
+		<label style="float: left" class="panel-title " ><a style="color: white" href="/menu/configuraciones/motivos/listar" >Motivos</a>
+			> Registro de Motivo</label>
+			<br>
+		</div>
+	    <div class="form-inline" >
+			<div class="panel-body">
+			<div class="form-group col-xs-1" style="font-weight: bolder;">Motivo:</div>
+			<div class="form-group col-xs-5">
+				<input id="motivo" value='{{editar_motivo.motivo}}' maxlength="60"  style="width: 100%;text-transform:uppercase;" onkeyup="javascript:this.value=this.value.toUpperCase();" placeholder="Nombre y/o descripción del motivo" name="motivo" type="text" />
+			</div>
+			</div>
+			
+	    </div>
+		<input id='id_r' type="hidden" name='user_create' value='{{editar_motivo.id}}'>
+	    <input id='user_update' type="hidden" name='user_update' value='{{ user.id }}'>
+	    <input id='user_create' type="hidden" name='user_create' value='{{editar_motivo.user_create.id}}'>
+	    <br/>
+	    <div class="row" style="text-align: center">
+		<a href='/menu/configuraciones/motivos/listar/'>
+			<button type="button" id="volver_mod" style="font-weight: bold;font-size: 13px" class="btn btn-warning " >
+				&nbsp;<span class="glyphicon glyphicon-chevron-left"></span>&nbsp;Volver
+			</button>
+		</a>
+		<button type="submit" id="registrar_mod" style="font-weight: bold;font-size: 13px" class="btn btn-primary"/>
+		    &nbsp;<span class="glyphicon glyphicon-floppy-disk"></span>&nbsp;Registrar
+		</button>
+	    </div>
+		<br/>
+	</div>
+		<br/>
+
+    </form>
+</body>
+
+</html>
+	{% endblock contenido%}

@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<script>
+$(document).ready(function(){
+    var TUbch = $('#tab_dependencia').dataTable({
+        "iDisplayLength": 10,
+        "iDisplayStart": 0,
+        "sPaginationType": "full_numbers",
+        "aLengthMenu": [25, 50, 75, 100],
+        "oLanguage": {"sUrl": "/static/js/es.txt"},
+        "aoColumns": [
+            {"sClass": "registro center", "sWidth": "3%"},
+            {"sClass": "registro center", "sWidth": "3%"},
+            {"sClass": "registro center", "sWidth": "25%"},
+            {"sClass": "registro center", "sWidth": "20%"},
+            {"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+            {"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+        ]
+    });
+    $('#enviar').click(function(){
+        url = '/menu/configuraciones/dependencias/registrardependencia/'
+        window.location = url
+    })
+});
+// Funcion encargarda de cambiar los estatus de las dependencias desde la vista lista
+	function cambiar_status(pk_id,dependencia_activa) {
+        id_data= String(pk_id)
+        bootbox.confirm({
+			title: 'Cambiar estatus de Dependencia',
+			message: '¿Realmente desea cambiar el estatus de esta dependencia?, tenga en cuenta que si la dependencia no esta activa no aparecera disponible para las diversas funciones y/o procesos del sistema',
+			buttons: {
+				'cancel': {
+					label: 'NO',
+					className: 'btn-primary'
+				},
+				'confirm': {
+					label: 'SI',
+					className: 'btn-info'
+				}
+			},
+			callback: function(result) {
+				if (result === true) {
+					$.post('', {'pk': id_data, 'dependencia_activa': dependencia_activa, 'csrfmiddlewaretoken': "{{ csrf_token }}"}, function (response) {
+						if (response == 'exito') {
+							bootbox.alert("El estatus ha sido actualizado", function () {
+							});
+						}
+					});
+				}else{
+					url = '/menu/configuraciones/dependencias/'
+					window.location = url
+				}
+			}
+		}); 
+    };
+	
+
+	
+	
+</script>
+{% load templatag_grupos %}
+{% ifusergroup Configuraciones %}
+<div class="row-fluid" >
+	<div class="container mainbody-section text-center"  style="width:100%;">
+			<button role="button" class="btn btn-primary" style="font-weight: bold;font-size: 13px" id="enviar" >
+				&nbsp;<span class="glyphicon glyphicon-plus"></span>&nbsp;Agregar Departamentos
+			</button>
+			<table style="width:100%;" border="0" align="center" cellspacing="1" id="tab_dependencia"
+			class="panel panel-warning  table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" >
+				<thead style="font-size: 16px">
+						<tr style="background-color: #1D88C6">
+							<th style='text-align: center;color: white' colspan="6">Listado de Departamentos</th>
+						</tr>
+						<tr class="primary">
+							<th style='text-align: center'>Item</th>
+							<th style='text-align: center'>Activa</th>
+							<th style='text-align: center'>Institución</th>
+							<th style='text-align: center'>Dependencia</th>
+							<th style='text-align: center'>Editar</th>
+							<th style='text-align: center'>Borrar</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for m in listar_dependencia %}
+						<tr style="font-size: 16px" class="{% cycle 'impar' 'par' %}">
+							<td>
+								{{ forloop.counter }}
+							</td>
+							<td>
+								{%if m.dependencia_activa == True %}
+									<input type="checkbox" name="check" class="btn_check" onclick="cambiar_status('{{m.id}}',$(this).prop('checked'))" checked="checked"/>
+									{% else %}
+									<input type="checkbox" name="check" class="btn_check" onclick="cambiar_status('{{m.id}}',$(this).prop('checked'))"/>
+								{% endif %}
+							</td>
+							<td>
+								{{m.institucion}}
+							</td>
+							
+							<td>
+								{{m.nom_dependencia}}
+							</td>
+							<td style='text-align: center'>
+								<a href="{% url "editar_dependencia" m.id %}" ><img style="width:25px;height: 25px" src="{{ STATIC_URL }}img/edit.png"/></a>
+							</td>
+							<td style='text-align: center'>
+								<a href="{% url "borrar_dependencia" m.id %}"><img style="width:25px;height: 25px" src="{{ STATIC_URL }}img/borrar.png"/></a>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+			</table>
+		</div>
+	</div>
+{% else %}
+<div class="text-center"> 	<img src="{{ STATIC_URL }}img/disculpe.png" style="width: 70%"/> </div>
+{% endifusergroup %}
+
+{% endblock %}

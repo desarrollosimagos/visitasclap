@@ -1,0 +1,54 @@
+{% extends "base.html" %} <!-- Heredando (Bloque) plantilla index -->
+	{% block title %}{% endblock %}
+	
+	{% block contenido %}
+	<html>
+<head>
+    <title>Eliminar Motivos</title>
+</head>
+
+{% load templatag_grupos %}
+
+<script>
+$(document).ready(function() {
+});
+</script>
+<body>
+    <form method="post" class="text-center">
+	{% csrf_token %}
+	<div style="width: 100%;text-transform:uppercase;box-shadow: 0 1px 5px rgba(0,0,0,.85)" onkeyup="javascript:this.value=this.value.toUpperCase();" class="panel panel-primary">
+		  <div class="panel-heading text-center">
+		  <label style="float: left" class="panel-title " ><a style="color: white" href="/menu/configuraciones/motivos/listar" >Motivos</a>
+			  > Eliminar Motivo</label>
+			  <br>
+		  </div>
+		  <div class="form-inline" >
+				<div class="panel-body">
+				<h3 style="color: red">¿Está seguro que quiere borrar este Motivo "{{ borrar_motivo.motivo }}" ?</h3>
+				 {% if cantidad > 0 %}
+					 <h4 style="color: red">Disculpe, pero no puede Eliminar este Motivo porque esta <span style="color: red"> vinculada a 1 o más XYZ</span></h4>
+				 {% endif%}
+				</div>
+				<div class="row" >
+					 <a href='/menu/configuraciones/motivos/listar/'>
+						<button type="button" style="font-weight: bold;font-size: 13px" class="btn btn-warning " >
+							&nbsp;<span class="glyphicon glyphicon-chevron-left"></span>&nbsp;Volver
+						</button>
+					</a>
+					 &nbsp;&nbsp;&nbsp;	
+				   <button style="font-weight: bold;font-size: 13px" type="submit" id="eliminar:mod" class="btn btn-primary "
+						{% if cantidad > 0 %}
+						disabled="disabled" 
+						{% endif %}
+					/><span class="glyphicon glyphicon-remove"></span>&nbsp;Eliminar
+					</button>
+			   </div>
+		  </div>
+		  <br>
+	 </div>
+    </form>
+	<br>
+</body>
+</html>
+	
+{% endblock contenido%}

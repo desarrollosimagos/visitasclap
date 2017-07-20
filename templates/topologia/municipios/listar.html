@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+{% load templatag_grupos %}
+{% ifusergroup Configuraciones %}
+<script>
+$(document).ready(function(){
+    var TUbch = $('#tab_municipio').dataTable({
+        "iDisplayLength": 10,
+        "iDisplayStart": 0,
+        "sPaginationType": "full_numbers",
+        "aLengthMenu": [15, 30],
+        "oLanguage": {"sUrl": "/static/js/es.txt"},
+        "aoColumns": [
+            {"sClass": "registro center", "sWidth": "10%"},
+            {"sClass": "registro center", "sWidth": "10%"},
+            {"sClass": "registro center", "sWidth": "15%"},
+            {"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+            {"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false}
+        ]
+    });
+    $('#enviar').click(function(){
+        url = '/menu/topologia/municipios/registrarmunicipio/'
+        window.location = url
+    })   
+    
+    
+
+});
+</script>
+<div class="row-fluid" >
+		<div class="container mainbody-section text-center"  style="width:100%;">
+			{% ifusergroup Administrador %}
+			    <a href='/menu/topologia/municipios/data'>
+				<button class='btn' style="color: white; font-weight: bold; background: linear-gradient(#D3C6AF, #BFA482);">
+				      <i class="fa fa-upload"></i>&nbsp;Importar Municipios</button>
+			    </a>
+			{% endifusergroup %}
+			<button role="button" class="btn btn-primary" style="font-weight: bold;font-size: 13px" id="enviar" >
+				&nbsp;<span class="glyphicon glyphicon-plus"></span>&nbsp;Agregar Municipio
+			</button>
+			<table style="width:100%;" border="0" align="center" cellspacing="1" id="tab_municipio" align="center"
+			class="panel panel-warning  table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" style="width:30%">
+				<thead style="font-size: 16px">
+					<tr style="background-color: #1D88C6">
+						<th style='color: white;text-align: center' colspan="5">Listado de Municipios</th>
+					</tr>
+					<tr class="primary">
+						<th style='text-align: center'>Estado</th>
+						<th style='text-align: center'>Código</th>
+						<th style='text-align: center'>Municipio</th>
+						<th style='text-align: center'>Editar</th>
+						<th style='text-align: center'>Borrar</th>
+					</tr>
+				</thead>
+				<tbody>    
+					{% for m in listar_municipio %}
+					<tr style="font-size: 14px" >
+						<td>{{m.estado}}</td>
+						<td>{{m.cod_municipio}}</td>
+						<td>{{m.municipio}}</td>
+						<td style='text-align: center'>
+							<a href="{% url "editar_municipio" m.id %}"><img style="width:25px;height: 25px" src="{{ STATIC_URL }}img/edit.png"/></a>
+						</td>
+						<td style='text-align: center'>
+							<a href="{% url "borrar_municipio" m.id %}"><img style="width:25px;height: 25px" src="{{ STATIC_URL }}img/borrar.png"/></a>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+<br><br>
+{% else %}
+<p style="color: #FF0000; font-size: 18px">Disculpe No esta autorizado para esa área.</p>
+{% endifusergroup %}
+{% endblock %}

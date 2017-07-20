@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+
+<html>
+<head>
+		<title>CONTROL DE VISITAS</title>
+		<meta charset="utf-8"/>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.theme.css">
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/select2.css"/>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/select2-bootstrap.css"/>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css"/>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css"/>
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/jquery.fancybox.css"/>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap-datepicker.css" />
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/fileinput.min.css" />
+        
+
+        <script src="{{ STATIC_URL }}js/jquery-1.11.2.min.js"></script>
+        <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+        <script src="{{ STATIC_URL }}js/jquery.dataTables.js"></script>
+        <script src="{{ STATIC_URL }}js/validaciones.js"></script>
+        <script src="{{ STATIC_URL }}js/jquery.alphanumeric.js"></script>
+		<script src="{{ STATIC_URL }}js/jquery.fancybox.js"></script>
+        <script src="{{ STATIC_URL }}js/fileinput.min.js"></script>
+        <script src="{{ STATIC_URL }}js/bootbox.js"></script>
+        
+        <script src="{{STATIC_URL}}js/bootstrap-datepicker.js"></script>
+        <script src="{{STATIC_URL}}js/bootstrap-datepicker.es.min.js"></script>
+        
+        <script src="{{ STATIC_URL }}js/select2.js"></script>
+        <script src="{{ STATIC_URL }}js/select2_locale_es.js"></script>
+        <script src="{{ STATIC_URL }}js/bootstrap-select.js"></script>
+        <script src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+        <script src="{{ STATIC_URL }}js/dataTables.responsive.min.js"></script>
+        <script src="{{ STATIC_URL }}js/highcharts.js"></script>
+        <script src="{{ STATIC_URL }}js/footerfijo.js"></script>
+
+<!-- Piwik -->
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(["setDomains", ["*.control.bva.org.ve"]]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//estadistica.bva.org.ve/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 14]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src="//estadistica.bva.org.ve/piwik.php?idsite=14" style="border:0;" alt="" /></p></noscript>
+<!-- End Piwik Code -->
+
+	
+</head>
+<script type="text/javascript">
+	$(document).ready(function(){
+		
+		$('#usuarios').click(function(){
+			url = '/nuevo_usuario'
+			window.location = url
+		})
+		
+	});
+</script>
+<style>
+#footer{
+		height: auto;
+		position: fixed !important;
+		bottom: 0px;
+		width:100% !important;	      
+}
+</style>
+<body>
+		{% load templatag_grupos %}
+		<header>
+		<nav class="navbar " style="background: linear-gradient(#3B98EF, #0C39CE)" role="navigation">
+				<div id="navbar" class="navbar-collapse collapse">
+						{% if user.is_authenticated %}
+							<ul class="nav navbar-nav" style="float:left; font-size: 16px">
+								<li id='id_inicio'>
+									<a href='/' style="color: white;font-weight: bold;"><span class="glyphicon glyphicon-home" style="color: white"></span>&nbsp;&nbsp;Inicio</a>
+								</li>
+								{% ifusergroup Atencion %}
+								<li class="dropdown">
+									<a href="#" style="color: white;font-weight: bold" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="glyphicon glyphicon-plus"></i>&nbsp; Registros <span class="caret"></span></a>
+									<ul class="dropdown-menu" role="menu" style="font-size: 16px">
+										<li><a href='/menu/registros/solicitud/registro/'><span class="fa fa-pencil"></span>&nbsp;Registrar Visita</a></li>
+										<li><a href='/menu/registros/solicitud/listar/'><i class="glyphicon glyphicon-list-alt"></i>&nbsp;Visitas</button></a></li>
+									</ul>
+								</li>
+								<li id='id_inicio'>
+									<a href='/menu/reportes/reportes_solicitudes/' style="color: white;font-weight: bold">
+										<i class="fa fa-bar-chart"></i>&nbsp;Reportes
+									</a>
+								</li>
+								{% endifusergroup %}
+								{% ifusergroup Configuraciones %}
+								<li class="dropdown">
+									<a style="color: white;font-weight: bold" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i>&nbsp;Configuraciones <span class="caret"></span></a>
+									<ul class="dropdown-menu" role="menu" style="font-size: 16px">
+										<li><a href='/menu/configuraciones/motivos/listar/'><i class="glyphicon glyphicon-list-alt" ></i>&nbsp;Motivos</a></li>
+										<li><a href='/menu/configuraciones/grupo_etareo/'><i class="fa fa-users"></i>&nbsp;Grupos Etáreos</a></li>
+										<li><a href='/menu/configuraciones/instituciones/' ><i class="fa fa-university"></i>&nbsp;Insituciones</a></li>
+										<li><a href='/menu/configuraciones/dependencias/'><i class="fa fa-building-o"></i>&nbsp;Departamentos</a></li>
+										<li><a href='/menu/configuraciones/tipo_educacion/listar/'><i class="fa fa-graduation-cap" ></i>&nbsp;Nivel de Instrucción</a></li>
+										<li><a href='/menu/configuraciones/ocupaciones/listar/'><i class="fa fa-list"></i>&nbsp;Ocupaciones</a></li>
+										<li><a href='/menu/configuraciones/organizaciones/listar/' ><i class="fa fa-sitemap"></i>&nbsp;Organizaciones</a></li>
+										<li><a href='/menu/configuraciones/sectores/listar/'><i class="fa fa-briefcase"></i>&nbsp;Sectores Laborales</a></li>
+									</ul>
+								</li>
+								<li class="dropdown">
+									<a href="#" style="color: white;font-weight: bold" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-globe"></i>&nbsp;Topología<span class="caret"></span></a>
+									<ul class="dropdown-menu" role="menu" style="font-size: 16px">
+										<li><a href="/menu/topologia/estados/"><i class="fa fa-globe"></i>&nbsp;Estados</a></li>
+										<li><a href="/menu/topologia/municipios/"><i class="fa fa-globe"></i>&nbsp;Municipios</a></li>
+										<li><a href="/menu/topologia/parroquias/"><i class="fa fa-globe"></i>&nbsp;Parroquias</a></li>
+									</ul>
+								</li>
+								{% endifusergroup %}
+								{% ifusergroup Administrador %}
+								<li id='id_inicio'>
+									<a href='/nuevo_usuario' style="color: white;font-weight: bold">
+										<i class="glyphicon glyphicon-user"></i>&nbsp;Gestión de Usuarios
+									</a>
+								</li>
+								{% endifusergroup %}
+								
+							</ul>
+							
+							<ul class="nav navbar-nav navbar-right" style="font-size: 16px">
+								<li><a href="/logout" style="color: white;font-weight: bold"><span class='glyphicon glyphicon-log-out' style="color: white;"></span>&nbsp;&nbsp;&nbsp;Cerrar sesión:  {{ user }}</a></li>
+							</ul>
+						{% endif %}
+				</div>
+		</nav>
+		<center>
+				<div class="text-center" style="width: 95%" >
+						{% block contenido %}{% endblock contenido %}
+				</div>
+		</center>
+		<div id="footer" style="text-align:center;margin-bottom: 0px;">
+            <!--<img src="{{ STATIC_URL }}img/footer.png" style="width: 100%" />-->
+        </div>
+    </header>
+
+
+</body>
+</html>
+
+

@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<script>
+$(document).ready(function(){
+    var TUbch = $('#tab_solicitudes').dataTable({
+        "iDisplayLength": 25,
+        "iDisplayStart": 0,
+        "sPaginationType": "full_numbers",
+        "aLengthMenu": [25, 50, 75, 100],
+        "oLanguage": {"sUrl": "/static/js/es.txt"},
+        "aaSorting":[[1,"desc"]],
+		"aoColumns": [
+           		    {"sClass": "registro center", "sWidth": "1%"},
+			{"sClass": "registro center", "sWidth": "1%"},
+            {"sClass": "registro center", "sWidth": "1%"},
+            {"sClass": "registro center", "sWidth": "20%"},
+			{"sClass": "registro center", "sWidth": "10%"},
+			{"sClass": "registro center", "sWidth": "10%"},
+			{"sClass": "registro center", "sWidth": "1%"},
+			{"sWidth": "1%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+            {"sWidth": "1%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+            {"sWidth": "1%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+        ]
+    });
+    
+	$('.cerrar').click(function(e){
+		var id = $(this).attr('id')
+		var padre      = $(this).closest('tr');
+		var nRow       = padre[0];
+		e.preventDefault()
+		bootbox.confirm({
+			title: 'Finalizar Visita',
+			message: '¿Disculpe, Está Seguro de Finalizar está Visita?',
+			buttons: {
+				'cancel': {
+				label: 'NO',
+				className: 'btn-primary'
+				},
+				'confirm': {
+				label: 'SI',
+				className: 'btn-info'
+				}
+			},
+
+			callback: function(result) {
+				if (result == false) {
+				
+				}else{
+					$.post('/menu/registros/solicitud/finalizar/',{'csrfmiddlewaretoken': "{{ csrf_token }}",'id': id},function(response){
+							bootbox.alert("Visita cerrada con exito", function() {
+								location.reload();
+							});
+					})
+				}
+			}
+		}); 	
+    });
+
+});
+
+
+</script>
+{% load templatag_grupos %}
+{% ifusergroup Atencion %}
+<div class="row-fluid" >
+	<div class="container mainbody-section text-center"  style="width:100%;">
+		<table style="width:100%;" border="0" align="center" cellspacing="1" id="tab_solicitudes"
+		class="panel panel-warning  table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" >
+			<thead style="font-size: 16px">
+				<tr style="background-color: #1D88C6">
+					<th style='text-align: center; color: white' colspan="10">Listado de Visitas</th>
+				</tr>
+				<tr class="primary">
+					<th style='text-align: center'>#</th>
+					<th style='text-align: center'>Solicitud</th>
+					<th style='text-align: center'>Cédula</th>
+					<th style='text-align: center'>Nombre y Apellido</th>
+					<th style='text-align: center'>Entra</th>
+					<th style='text-align: center'>Salida</th>
+					<th style='text-align: center'>Estatus</th>
+					<th style='text-align: center'>Acción</th>
+					<th style='text-align: center'>Ver</th>
+					<th style='text-align: center'>Borrar</th>
+				</tr>
+			</thead>
+			<tbody>
+			  {% for reg in listado %}
+				<tr style="font-size: 14px;" >
+					<td>{{ forloop.counter }}</td>
+					<td>{{reg.codigo}}</td>
+					<td>{{reg.cedula}}</td>
+					<td>{{reg.nombre}} {{reg.apellido}}</td>
+					<td>{{reg.fecha_ent|date:"d/m/Y H:i:s " }}</td>
+					<td>{%if reg.fecha_sal == None %}
+							---------
+						{% else %}
+							{{reg.fecha_sal|date:"d/m/Y" }} {{ reg.fecha_sal|time:"H:i:s" }}
+						{% endif %}
+					</td>
+					<td>{%if reg.status == '1' %}
+							<span style="color: red; font-weight: bold">En Proceso</span>
+						{% else %}
+							<span style="color: green; font-weight: bold">Finalizada</span>
+						{% endif %}
+					</td>
+					<td>
+					  
+						{%if reg.status == '1' %}
+							<a href=''>
+								<img class="cerrar" id="{{reg.id}}" style="width:30px;height: 30px" src="{{ STATIC_URL }}img/up.png"/>
+							</a>
+						{% else %}
+							<img style="width:30px;height: 30px;"  src="{{ STATIC_URL }}img/up2.png"/>
+						{% endif %}
+						
+					 
+					</td>
+					
+					<td>
+					  <a href='{% url "actualizar" reg.id %}'>
+						<img style="width:30px;height: 30px" src="{{ STATIC_URL }}img/ver.png"/>
+					  </a>
+					</td>
+					
+					<td>
+					  <a href='{% url "eliminar" reg.id %}'>
+					  <img style="width:30px;height: 30px" src="{{ STATIC_URL }}img/borrar.png"/>
+					</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+<br>
+<br>
+<br>
+{% else %}
+<div class="text-center">
+	<img src="{{ STATIC_URL }}img/disculpe.jpg" style="width: 70%"/>
+</div>
+
+{% endifusergroup %}
+{% endblock %}

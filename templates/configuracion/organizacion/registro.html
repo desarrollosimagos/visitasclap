@@ -1,0 +1,102 @@
+{% extends "base.html" %} <!-- Heredando (Bloque) plantilla index -->
+{% block title %}{% endblock %}
+
+{% block contenido %}
+
+<html>
+<head>
+    <title>Registrar Modelos</title>
+</head>
+<script type="text/javascript">
+$(document).ready(function(){
+
+    $('input').on({
+		keypress: function() {
+			$(this).parent('div').removeClass('has-error');
+		}
+    });
+    
+    $('#organizacion').alpha({allow:"- "}); //Valida solo valores numericos y texto
+    
+    $('#registrar_mod').click(function(e) {
+		e.preventDefault();
+		
+		 if (($('#organizacion').val().trim() == '')) {
+			bootbox.alert("Debe colocar el organizacion", function() {
+				$('#organizacion').parent('div').addClass('has-error'); // colocar class has-error de boostrap
+				$('#organizacion').focus()  
+			});
+		}
+		else{
+			$.post('',$('#form_organizacion').serialize()+'&bandera=true',function(response){
+				//alert(response)
+				if (response == 'existe') {
+					bootbox.alert("Este Organización ya esta registrado", function() {
+						$('#organizacion').parent('div').addClass('has-error'); // colocar class has-error de boostrap
+						$('#organizacion').focus()
+					});
+				}else{
+					url = '/menu/configuraciones/organizaciones/listar/'
+					window.location = url
+				}
+			});
+		}
+	});
+    
+    
+    $('#volver_mod').click(function(){
+        url = '/menu/configuraciones/organizaciones/listar/'
+        window.location = url
+    })
+});
+
+</script>
+
+
+<body>
+	{% load templatag_grupos %}
+	{% ifusergroup Configuraciones %}
+    <form method="post" id="form_organizacion" enctype="multipart/form-data">
+	{% csrf_token %}
+	<div style="width: 100%;text-transform:uppercase;box-shadow: 0 1px 5px rgba(0,0,0,.85)" onkeyup="javascript:this.value=this.value.toUpperCase();" class="panel panel-primary">
+	    <div class="panel-heading text-center">
+			<label style="float: left" class="panel-title " ><a style="color: white" href="/menu/configuraciones/organizaciones/listar" >Organizaciones</a>
+			> Registrar Organización</label>
+			<br>
+		</div>
+	    <br/>
+	    <div class="form-inline" >
+			<div class="form-group col-xs-2" style="font-weight: bolder;">Organización:</div>
+			<div class="form-group col-xs-5">
+				<input id="organizacion" maxlength="60"  style="width: 100%;text-transform:uppercase;" onkeyup="javascript:this.value=this.value.toUpperCase();" placeholder="Nombre y/o descripción del organización" name="organizacion" type="text" />
+			</div>
+	    </div>
+		
+	    <input id='user_create' type="hidden" name='user_create' value='{{ user.id }}'>
+	    <br/>
+	    <br/>
+	    <br/>
+	    <div class="row" style="text-align: center">
+		<button type="button" id="volver_mod" style="font-weight: bold;font-size: 13px" class="btn btn-warning " >
+		    &nbsp;<span class="glyphicon glyphicon-chevron-left"></span>&nbsp;Volver
+		</button>
+		<button type="submit" id="registrar_mod" style="font-weight: bold;font-size: 13px" class="btn btn-primary"/>
+		    &nbsp;<span class="glyphicon glyphicon-floppy-disk"></span>&nbsp;Registrar
+		</button>
+		<button type="reset" id="limpiar" style="font-weight: bold;font-size: 13px; background: linear-gradient(#f4eb2f, #e5a32d); color: white " class="btn"/>
+		    &nbsp;<span class="glyphicon glyphicon-retweet"></span>&nbsp;&nbsp;Limpiar
+		</button>
+	    </div>
+		<br/>
+	</div>
+		<br/>
+
+    </form>
+	{% else %}
+	<div class="text-center"><img src="{{ STATIC_URL }}img/disculpe.png" style="width: 75%; margin-top: 2% "/></div>
+	{% endifusergroup %}
+</body>
+
+</html>
+		
+	{% endblock contenido%}

@@ -1,0 +1,10 @@
+11-07-2016
+REPORTE FICHA PERSONAL:
+apps/reportes/reportes_solicitudes/formato_reportes/
+-class_pdf.py (ACT)
+-reporte_ficha_personal (NUEVO)
+apps/reportes/reportes_solicitudes/
+-views.py (ACT)
+-urls.py (ACT)
+tempaltes/reportes/
+-reportes_solicitudes.html

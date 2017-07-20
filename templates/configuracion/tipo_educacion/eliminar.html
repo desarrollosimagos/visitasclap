@@ -1,0 +1,65 @@
+{% extends "base.html" %} <!-- Heredando (Bloque) plantilla index -->
+	{% block title %}Gestión{% endblock %}
+	
+	{% block contenido %}
+	<html>
+<head>
+    <title>Eliminar Modeloes</title>
+</head>
+
+{% load templatag_grupos %}
+
+<script>
+$(document).ready(function() {
+    $('#volver_mod').click(function(){
+        url = '/menu/configuraciones/tipo_educacion/listar/'
+        window.location = url
+    })
+});
+</script>
+{% load templatag_grupos %}
+{% ifusergroup Configuraciones %}
+<body>   
+    <form method="post" class="text-center">
+	{% csrf_token %}
+		<div style="width: 100%;text-transform:uppercase;box-shadow: 0 1px 5px rgba(0,0,0,.85)" onkeyup="javascript:this.value=this.value.toUpperCase();" class="panel panel-primary">
+		  <div class="panel-heading text-center">
+		  <label style="float: left" class="panel-title " ><a style="color: white" href="/menu/configuraciones/tipo_educacion/listar/" >Tipos de Educación</a>
+			  > Eliminar Tipos de Educación</label>
+			  <br>
+		  </div>
+		  <div class="form-inline" >
+				<div class="panel-body">
+				<h3 style="color: red">¿Está seguro que quiere borrar este Nivel de Instrucción "{{ eliminar_tipo.tipo }}" ?</h3>
+				{% if cantidad > 0 %}
+					<h4 style="color: red">Disculpe, pero no puede Eliminar este Nivel de Instrucción porque esta <span style="color: red"> vinculada a 1 o más XYZ</span></h4>
+				{% endif%}
+				</div>
+				<div class="row" >
+					 <a href='/menu/configuraciones/tipo_educacion/listar/'>
+						<button type="button" style="font-weight: bold;font-size: 13px" class="btn btn-warning " >
+							&nbsp;<span class="glyphicon glyphicon-chevron-left"></span>&nbsp;Volver
+						</button>
+					</a>
+					 &nbsp;&nbsp;&nbsp;	
+				   <button style="font-weight: bold;font-size: 13px" type="submit" id="eliminar:mod" class="btn btn-primary "
+						{% if cantidad > 0 %}
+						disabled="disabled" 
+						{% endif %}
+					/><span class="glyphicon glyphicon-remove"></span>&nbsp;Eliminar
+					</button>
+			   </div>
+		  </div>
+		  <br>
+	 </div>
+    </form>
+	<br>
+</body>
+{% else %}
+<div class="text-center">
+	<img src="{{ STATIC_URL }}img/disculpe.png" style="width: 70%"/>
+</div>
+{% endifusergroup %}
+</html>
+	
+{% endblock contenido%}

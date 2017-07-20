@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<html>
+<head>
+    <title>Registrar Dependencia</title>
+</head>
+<script type="text/javascript">
+$(document).ready(function(){
+	
+
+    $('select').on({
+		change: function() {
+			$(this).parent('div').removeClass('has-error');
+		}
+    });
+    $('input').on({
+		keypress: function() {
+			$(this).parent('div').removeClass('has-error');
+		}
+    });
+    
+	$("#institucion").select2();
+    $('#nom_dependencia').alphanumeric({allow:",-. "}); //Valida solo valores numericos y texto
+    $('#correo').alphanumeric({allow:"@-_."}); 
+    $('#siglas').alpha({allow:" "}); //Solo permite texto
+    
+    $('#registrar').click(function(e) {
+	e.preventDefault();
+		
+		var id_institucion = $('#institucion').find('option').filter(':selected').val()
+	
+		
+		if (id_institucion == 0) {
+			bootbox.alert('Debe indicar la Dependencia', function(){
+				$('#institucion').addClass('has-error');
+				$('#institucion').select2('open') 
+			});
+			
+		}
+		else if (($('#nom_dependencia').val().trim() == '')) {
+			bootbox.alert("Debe indicar el Nombre de la Dependencia", function() {
+			$('#nom_dependencia').parent('div').addClass('has-error'); // colocar class has-error de boostrap
+			$('#nom_dependencia').focus()
+				});
+		}
+		else if (($('#siglas').val().trim() == '')) {
+			bootbox.alert("Debe indicar las siglas de la Dependencia", function() {
+				$('#siglas').parent('div').addClass('has-error'); // colocar class has-error de boostrap
+				$('#siglas').focus()  
+			});
+			
+		}
+		else if (($('#correo').val().length < 10)) {
+			bootbox.alert('Disculpe, Debe indicar el Correo del Partido', function() {	    
+			$('#correo').parent('div').addClass('has-error');
+			});
+		}
+		else{
+			$('#form_depen').submit();
+		}
+    });
+    
+    
+    $('#volver').click(function(){
+        url = '/menu/configuraciones/dependencias/'
+        window.location = url
+    })
+    $('#limpiar').click(function(){
+        //$('#id_partido').select2('val', '0');
+    })
+});
+
+</script>
+{% load templatag_grupos %}
+{% ifusergroup Configuraciones %}
+<body>
+    <form method="post" id="form_depen" enctype="multipart/form-data">
+	{% csrf_token %}
+	
+	<div style="width: 100%;text-transform:uppercase;box-shadow: 0 1px 5px rgba(0,0,0,.85)" onkeyup="javascript:this.value=this.value.toUpperCase();" class="panel panel-primary">
+		<div class="panel-heading text-center">
+			<label style="float: left" class="panel-title " ><a style="color: white" href="/menu/configuraciones/dependencias/" >Departamentos</a>
+			> Modificar Departamentos</label>
+			<br>
+		</div>
+		<fieldset><legend class="titulo">Datos del Departamento</legend></fieldset>
+
+	    <br/>
+		<div class="form-inline" >
+			<div class="col-xs-1" style="font-weight: bolder;">Nombre:</div>
+			<div class="col-xs-11">
+				<select style="width:100%;" class="form-control input-sm" id="institucion" name="institucion" required=True>
+					<option value="0">Seleccione</option>
+					{% for e in list_institucion %}
+						{% if e.id == editar_dependencia.institucion_id %}
+						<option value='{{e.id}}' selected='selected'>{{ e.nom_institucion }}</option>
+						{% endif %}
+						{% if not e.id == editar_dependencia.institucion_id %}
+						<option value='{{e.id}}'>{{ e.nom_institucion }}</option>
+						{% endif %}
+					{% endfor %}
+				</select>
+			</div>
+	    </div>
+		<br/>
+	    <br/>
+	    <br/>
+		
+		<div class="form-inline" >
+			<div class="col-xs-1" style="font-weight: bolder;">Nombre Dpto:</div>
+			<div class="col-xs-5">
+				<label class="fom_ley"></label><input id="nom_dependencia" value='{{editar_dependencia.nom_dependencia}}' maxlength="125"  style="width: 100%;text-transform:uppercase;" onkeyup="javascript:this.value=this.value.toUpperCase();" placeholder="Nombre de la Dependencia" name="nom_dependencia" type="text" />
+			</div>
+			
+			<div class="form-group col-xs-1" style="font-weight: bolder;">Siglas:</div>
+			<div class="form-group col-xs-5">
+				<label class="fom_ley"></label><input id="siglas" maxlength="15" value='{{editar_dependencia.siglas}}'  style="width: 100%;text-transform:uppercase;" onkeyup="javascript:this.value=this.value.toUpperCase();" placeholder="Siglas o Abreviatura" name="siglas" type="text" />
+			</div>
+	    </div>
+	    <br/>
+	    <br/>
+	    <br/>
+	   
+	   <div class="form-inline">
+		
+			<div class="form-group col-xs-1">
+		    <label>Correo: </label>
+		</div>
+		<div class="form-group col-xs-5">
+		    <input id="correo" name="correo" style="width: 100%;bold;font-size: 13px" value='{{editar_dependencia.correo}}' placeholder="Ejemplo: correo@gmail.com"  maxlength="100" type="text" />
+		</div>
+			<div class="form-group col-xs-6" style="text-align: left;font-weight: bold;">
+				<label>Activa:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				<input type="checkbox" id="dependencia_activa" name="dependencia_activa"
+				{% if editar_dependencia.dependencia_activa == True %}
+					checked="checked"
+				{% endif %}/>
+				<label>&nbsp;&nbsp;&nbsp; **¿Dependencia Activa?</label>
+			</div>
+	    </div>
+	    <br/>
+	    <br/>
+	    <br/>
+
+	    <input id='user_update' type="hidden" name='user_update' value='{{ user.id }}'>
+	    <input id='user_create' type="hidden" name='user_create' value='{{editar_dependencia.user_create.id}}'>
+	    <br/>
+	    <br/>
+	    <br/>
+	    <div class="row" style="text-align: center">
+		<button type="button" id="volver" style="font-weight: bold;font-size: 13px" class="btn btn-warning " >
+		    &nbsp;<span class="glyphicon glyphicon-chevron-left"></span>&nbsp;Volver
+		</button>
+		<button type="submit" id="registrar" style="font-weight: bold;font-size: 13px" class="btn btn-primary"/>
+		    &nbsp;<span class="glyphicon glyphicon-floppy-disk"></span>&nbsp;Guardar Cambios
+		</button>
+	    </div>
+		<br/>
+	</div>
+		<br/>
+
+    </form>
+</body>
+{% else %}
+<div class="text-center">
+	<img src="{{ STATIC_URL }}img/disculpe.png" style="width: 70%"/>
+</div>
+{% endifusergroup %}
+
+
+</html>
+{% endblock %}

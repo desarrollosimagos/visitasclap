@@ -1,0 +1,70 @@
+{% extends "base.html" %} <!-- Heredando (Bloque) plantilla index -->
+	{% block title %}Gestión{% endblock %}
+	
+	{% block contenido %}
+
+<html>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	var TUbch = $('#tab_modelo').dataTable({
+		"iDisplayLength": 10,
+		"iDisplayStart": 0,
+		"sPaginationType": "full_numbers",
+		"aLengthMenu": [10, 20, 30],
+		"oLanguage": {"sUrl": "/static/js/es.txt"},
+		"aoColumns": [
+			{"sClass": "registro center", "sWidth": "1%"},
+			{"sClass": "registro center", "sWidth": "40%"},
+			{"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+			{"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false}
+		]
+	});
+	$('#enviar').click(function(){
+		url = '/menu/configuraciones/tipo_educacion/registro/'
+		window.location = url
+	})   
+
+});
+</script>
+
+<body>
+<div class="row-fluid" >
+	<div class="container mainbody-section text-center"  style="width:100%;">
+		<button role="button" class="btn btn-primary" style="font-weight: bold;font-size: 13px" id="enviar" >
+			&nbsp;<span class="glyphicon glyphicon-plus"></span>&nbsp;Agregar Nivel de Instrucción
+		</button>
+		<table style="width:100%;" border="0" align="center" cellspacing="1" id="tab_modelo"
+			class="panel panel-warning  table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" >
+				<thead style="font-size: 16px">
+					<tr style="background-color: #1D88C6">
+						<th style='color: white;text-align: center' colspan="4">Listado de Niveles de Instrucción</th>
+					</tr>
+					<tr class="primary">
+						<th style='text-align: center'>#</th>
+						<th style='text-align: center'>Nivel de Instrucción</th>
+						<th style='text-align: center'>Editar</th>
+						<th style='text-align: center'>Borrar</th>
+					</tr>
+				</thead>
+				<tbody>    
+					{% for m in listar_tipo %}
+
+					<tr style="font-size: 14px;" >
+						<td>{{forloop.counter}} </td>
+						<td>{{m.tipo}}</td>
+						<td style='text-align: center'>
+							<a href="{% url "editar_tipo_educacion" m.id %}"><img style="width:25px;height: 25px" src="{{ STATIC_URL }}img/edit.png"/></a>
+						</td>
+						<td style='text-align: center'>
+							<a href="{% url "eliminar_tipo_educacion" m.id %}"><img style="width:25px;height: 25px" src="{{ STATIC_URL }}img/borrar.png"/></a>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+</div>
+</body>
+</html>
+    
+    {% endblock contenido%}

@@ -1,0 +1,83 @@
+{% extends "base.html" %} <!-- Heredando (Bloque) plantilla index -->
+{% block title %}{% endblock %}
+
+{% block contenido %}
+
+<html>
+
+<script type="text/javascript">
+   $(document).ready(function(){
+    var TUbch = $('#tab_ocupacion').dataTable({
+        "iDisplayLength": 10,
+        "iDisplayStart": 0,
+        "sPaginationType": "full_numbers",
+        "aLengthMenu": [10, 20, 30],
+        "oLanguage": {"sUrl": "/static/js/es.txt"},
+        "aoColumns": [
+            {"sClass": "registro center", "sWidth": "1%"},
+            {"sClass": "registro center", "sWidth": "40%"},
+            {"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+            {"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false}
+        ]
+    });
+    $('#enviar').click(function(){
+        url = '/menu/configuraciones/ocupaciones/registro/'
+        window.location = url
+    })   
+
+});
+</script>
+
+<body>
+{% load templatag_grupos %}
+{% ifusergroup Configuraciones %}
+<div class="row-fluid" >
+		<div class="container mainbody-section text-center"  style="width:100%;">
+			{% ifusergroup Administrador %}
+			<a href='/menu/configuraciones/ocupaciones/data'>
+			   <button class='btn' style="color: white; font-weight: bold; background: linear-gradient(#D3C6AF, #BFA482);">
+				   &nbsp;<span class="fa fa-upload"></span>&nbsp;Importar Ocupaciones
+			   </button>
+			</a>
+			{% endifusergroup %}
+			<button role="button" class="btn btn-primary" style="font-weight: bold;font-size: 13px" id="enviar" >
+				&nbsp;<span class="glyphicon glyphicon-plus"></span>&nbsp;Agregar Ocupación
+			</button>
+			<table style="width:100%;" border="0" align="center" cellspacing="1" id="tab_ocupacion"
+			class="panel panel-warning  table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" >
+				<thead style="font-size: 16px">
+					<tr style="background-color: #1D88C6">
+						<th style='color: white;text-align: center' colspan="4">Listado de Motivos</th>
+					</tr>
+					<tr class="primary">
+						<th style='text-align: center'>#</th>
+						<th style='text-align: center'>Ocupaciones</th>
+						<th style='text-align: center'>Editar</th>
+						<th style='text-align: center'>Borrar</th>
+					</tr>
+				</thead>
+				<tbody>    
+					{% for m in listar_ocupacion %}
+
+					<tr style="font-size: 14px" >
+						<td>{{forloop.counter}} </td>
+						<td>{{m.ocupacion}}</td>
+						<td style='text-align: center'>
+							<a href="{% url "editar_ocupacion" m.id %}"><img style="width:25px;height: 25px" src="{{ STATIC_URL }}img/edit.png"/></a>
+						</td>
+						<td style='text-align: center'>
+							<a href="{% url "eliminar_ocupacion" m.id %}"><img style="width:25px;height: 25px" src="{{ STATIC_URL }}img/borrar.png"/></a>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+<br><br>
+   {% else %}
+   <div class="text-center"><img src="{{ STATIC_URL }}img/disculpe.png" style="width: 75%; margin-top: 2% "/></div>
+   {% endifusergroup %}
+</body>
+</html>
+{% endblock contenido%}

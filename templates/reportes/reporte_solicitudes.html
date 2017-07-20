@@ -1,0 +1,796 @@
+{% extends 'base.html' %}
+{% block contenido %}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Reporte Solicitudes</title>
+</head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+<script src="{{ STATIC_URL }}js/exporting.js"></script>
+<script src="{{ STATIC_URL }}js/drilldown.js"></script>
+<script type="text/javascript">
+    var chart;
+
+    $(document).ready(function(){
+		$('select').on({
+			change: function() {
+				$(this).parent('div').removeClass('has-error');
+			}
+		});
+		$('input').on({
+			keypress: function() {
+				$(this).parent('div').removeClass('has-error');
+			}
+		});
+		
+		var startDate = new Date('01/01/2015');
+		var FromEndDate = new Date();
+		var ToEndDate = new Date();
+		
+		ToEndDate.setDate(ToEndDate.getDate()+365);
+		
+		$('#from_date').datepicker({
+			format: "dd-mm-yyyy",
+			endDate: FromEndDate,
+			language: "es",
+			//startView: 1,
+			autoclose: true,
+			startDate: "-1y"
+		})
+		.on('changeDate', function(selected){
+			startDate = new Date(selected.date.valueOf());
+			startDate.setDate(startDate.getDate(new Date(selected.date.valueOf())));
+			$('#to_date').datepicker('setStartDate', startDate);
+		}); 
+		$('#to_date')
+			.datepicker({
+			format: "dd-mm-yyyy",
+			startDate: startDate,
+			endDate: "today",
+			autoclose: true,
+			language: "es"
+		})
+		.on('changeDate', function(selected){
+			FromEndDate = new Date(selected.date.valueOf());
+			FromEndDate.setDate(FromEndDate.getDate(new Date(selected.date.valueOf())));
+			$('#from_date').datepicker('setEndDate', FromEndDate);
+		});
+
+		$('#id_tipo').change(function() {
+			var tipo = $(this).val();
+			if (tipo == 4) { //TODO
+				$('#id_cod_estado_1').select2('val', '0');
+				$('#id_cod_estado_1').prop('disabled',false)
+			}else{ //Por Municipio
+				$('#id_cod_estado_1').select2('val', '0');
+				$('#id_cod_estado_1').prop('disabled',true)
+			}
+		});
+		
+		$('#id_tipo_2').change(function() {
+			var tipo = $(this).val();
+			if (tipo == 1) { //Genero
+				$('#dependencia,#id_sexo,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#id_sexo').prop('disabled',false)
+				$('#dependencia,#id_grupo,#id_modelo,#id_tipo_e,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_organizacion,#id_sector_lab,#motivo').prop('disabled',true)
+			}else if (tipo == 2) { //Grupo Etareo
+				$('#dependencia,#id_grupo,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#id_grupo').prop('disabled',false)
+				$('#dependencia,#id_sexo,#id_modelo,#id_tipo_e,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_organizacion,#id_sector_lab,#motivo').prop('disabled',true)
+			}
+			else if (tipo == 3) { //Motivo
+				$('#dependencia,#motivo,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#motivo').prop('disabled',false)
+				$('#dependencia,#id_sexo,#id_modelo,#id_tipo_e,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_organizacion,#id_sector_lab,#id_grupo').prop('disabled',true)
+			}else if (tipo == 4) { //Municipio
+				$('#dependencia,#id_cod_estado,#id_cod_municipio,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#id_cod_estado,#id_cod_municipio').prop('disabled',false)
+				$('#dependencia,#id_sexo,#id_modelo,#id_tipo_e,#motivo,#dependencia,#id_ocupacion,#id_organizacion,#id_sector_lab,#id_grupo').prop('disabled',true)
+			}
+			else if (tipo == 5) { //Ocupacion
+				$('#dependencia,#id_ocupacion,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#id_ocupacion').prop('disabled',false)
+				$('#dependencia,#id_sexo,#id_modelo,#id_tipo_e,#id_cod_estado,#id_cod_municipio,#dependencia,#motivo,#id_organizacion,#id_sector_lab,#id_grupo').prop('disabled',true)
+			}
+			else if (tipo == 6) { //Tipo de Educación
+				$('#dependencia,#id_tipo_e,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#id_tipo_e').prop('disabled',false)
+				$('#dependencia,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_organizacion,#id_sector_lab,#id_grupo').prop('disabled',true)
+			}
+			else if (tipo == 7) { //Organizacion
+				$('#dependencia,#id_organizacion,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#id_organizacion').prop('disabled',false)
+				$('#dependencia,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_sector_lab,#id_grupo').prop('disabled',true)
+			}
+			else if (tipo == 8) { //Sector
+				$('#dependencia,#id_sector_lab,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#id_sector_lab').prop('disabled',false)
+				$('#dependencia,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').prop('disabled',true)
+			}
+			else if (tipo == 9) { //Sector
+				$('#dependencia,#id_sector_lab,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#dependencia,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').select2('val', '0');
+				$('#dependencia').prop('disabled',false)
+				$('#id_sector_lab,#id_tipo_e,#id_sexo,#id_modelo,#motivo,#id_cod_estado,#id_cod_municipio,#id_ocupacion,#id_tipo_e,#id_organizacion,#id_grupo').prop('disabled',true)
+			}
+			else{ //Por Municipio
+				$('#id_cod_estado_1').select2('val', '0');
+				$('#id_cod_estado_1').prop('disabled',true)
+			}
+		});
+		
+		
+		$("#id_tipo_ficha,#dependencia,#id_sexo,#id_grupo,#institucion,#id_tipo_2,#id_tipo_e,#id_cod_estado_1,#id_modelo,#id_tipo,#id_cod_estado,#id_cod_municipio,#id_cod_parroquia,#institucion,#dependencia,#id_ocupacion,#id_organizacion,#id_sector_lab,#motivo,#id_persona").select2();
+        
+		$('#exportar_general').click(function(){
+			var tipo = $('#id_tipo_2').find('option').filter(':selected').val()
+			var titulo = ($('#id_tipo').find('option').filter(':selected').text())
+			var institucion = $('#institucion').find('option').filter(':selected').val()
+			var sexo = $('#id_sexo').find('option').filter(':selected').val()
+			var grupo = $('#id_grupo').find('option').filter(':selected').val()
+			var tipo_edu = $('#id_tipo_e').find('option').filter(':selected').val()
+			var estado = $('#id_cod_estado').find('option').filter(':selected').val()
+			var modelo = $('#id_modelo').find('option').filter(':selected').val()
+			var municipio = $('#id_cod_municipio').find('option').filter(':selected').val()
+			var ocupacion = $('#id_ocupacion').find('option').filter(':selected').val()
+			var organizacion = $('#id_organizacion').find('option').filter(':selected').val()
+			var sector = $('#id_sector_lab').find('option').filter(':selected').val()
+			var motivo = $('#motivo').find('option').filter(':selected').val()
+			var dependencia = $('#dependencia').find('option').filter(':selected').val()
+			var desde = $('#from_date').val()
+			var hasta = $('#to_date').val()
+			
+            titulo = "Cantidad de vistas recibidas por "+titulo
+			sub_titulo = "Del "+desde+" al "+hasta
+			
+			if (($('#from_date').val() == '')) {
+				bootbox.alert('Debe indicar Desde que Fecha quiere el Reporte', function() {	    
+					$('#from_date').css('border','1px solid #66AFE9');
+					$('#from_date').focus();
+				});
+			}
+			else if (($('#to_date').val() == '')) {
+				bootbox.alert('Debe indicar Hasta que Fecha quiere el Reporte', function() {	    
+					$('#to_date').css('border','1px solid #66AFE9');
+					$('#to_date').focus();
+				});
+			}
+			else if (institucion == 0) {
+                bootbox.alert('Debe Seleccionar la Institución para poder generar los gráficos', function() {	    
+					$('#institucion').select2('open');
+				});
+            }else if (tipo == 0) {
+                bootbox.alert('Debe Seleccionar tipo de reporte para poder generar los gráficos', function() {	    
+					$('#id_tipo').select2('open');
+				});
+				
+			}else if ((tipo == 1 ) && sexo == 0)  {
+                bootbox.alert('Debe Seleccionar el Sexo para poder generar el reporte', function() {	    
+					$('#id_sexo').select2('open');
+				});
+			}else if ((tipo == 2 ) && grupo == 0)  {
+                bootbox.alert('Debe Seleccionar el Grupo Etáreo para poder generar el reporte', function() {	    
+					$('#id_grupo').select2('open');
+				});
+			}else if ((tipo == 3 ) && motivo == 0)  {
+                bootbox.alert('Debe Seleccionar el Motivo para poder generar el reporte', function() {	    
+					$('#motivo').select2('open');
+				});
+			}else if ((tipo == 4 ) && estado == 0)  {
+                bootbox.alert('Debe Seleccionar el Estado para poder generar el reporte', function() {	    
+					$('#id_cod_estado').select2('open');
+				});
+			}else if ((tipo == 4 ) && estado == 0 && municipio == 0)  {
+                bootbox.alert('Debe Seleccionar el Municipio para poder generar el reporte', function() {	    
+					$('#id_cod_municipio').select2('open');
+				});
+			}else if ((tipo == 5 ) && ocupacion == 0)  {
+                bootbox.alert('Debe Seleccionar la Ocupación para poder generar el reporte', function() {	    
+					$('#id_ocupacion').select2('open');
+				});
+			}else if ((tipo == 6 ) && tipo_edu == 0)  {
+                bootbox.alert('Debe Seleccionar la Educación para poder generar el reporte', function() {	    
+					$('#id_tipo_e').select2('open');
+				});
+			}
+			else if ((tipo == 7 ) && organizacion == 0)  {
+                bootbox.alert('Debe Seleccionar la Organización para poder generar el reporte', function() {	    
+					$('#id_organizacion').select2('open');
+				});
+			}else if ((tipo == 8 ) && sector == 0)  {
+                bootbox.alert('Debe Seleccionar el Sector para poder generar el reporte', function() {	    
+					$('#id_sector_lab').select2('open');
+				});
+			}else if ((tipo == 9 ) && dependencia == 0)  {
+                bootbox.alert('Debe Seleccionar el Departamento para poder generar el reporte', function() {	    
+					$('#dependencia').select2('open');
+				});
+			}
+            else {
+				if (tipo == 1)   {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&sexo='+sexo
+				}else if (tipo == 2)  {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&grupo='+grupo 
+				}else if (tipo == 3)  {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&motivo='+motivo
+				}else if (tipo == 4)  {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&estado='+estado+'&municipio='+municipio
+				}else if (tipo == 5)  {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&ocupacion='+ocupacion
+				}else if (tipo == 6)  {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&tipo_edu='+tipo_edu
+				}
+				else if (tipo == 7)  {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&organizacion='+organizacion
+				}else if (tipo == 8)  {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&sector='+sector
+				}else if (tipo == 9)  {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&dependencia='+dependencia
+				}else {
+					var url = 'reporte/?tipo='+tipo+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta
+				}
+				window.open(url); 
+            }
+        });
+		
+        $('#grafico_visitas').click(function(){
+			
+			var tipo = $('#id_tipo').find('option').filter(':selected').val()
+			var titulo = ($('#id_tipo').find('option').filter(':selected').text())
+			var institucion = $('#institucion').find('option').filter(':selected').val()
+			var estado = $('#id_cod_estado_1').find('option').filter(':selected').val()
+			var desde = $('#from_date').val()
+			var hasta = $('#to_date').val()
+			
+            titulo = "Cantidad de vistas recibidas por "+titulo
+			sub_titulo = "Del "+desde+" al "+hasta
+			
+			if (($('#from_date').val() == '')) {
+				bootbox.alert('Debe indicar Desde que Fecha quiere el Reporte', function() {	    
+					$('#from_date').css('border','1px solid #66AFE9');
+					$('#from_date').focus();
+				});
+			}
+			else if (($('#to_date').val() == '')) {
+				bootbox.alert('Debe indicar Hasta que Fecha quiere el Reporte', function() {	    
+					$('#to_date').css('border','1px solid #66AFE9');
+					$('#to_date').focus();
+				});
+			}
+			else if (institucion == 0) {
+                bootbox.alert('Debe Seleccionar la Institución para poder generar los gráficos', function() {	    
+					$('#institucion').select2('open');
+				});
+            }else if (tipo == 0) {
+                bootbox.alert('Debe Seleccionar tipo de reporte para poder generar los gráficos', function() {	    
+					$('#id_tipo').select2('open');
+				});
+			}else if ((tipo == 4 ) && estado == 0)  {
+                bootbox.alert('Debe Seleccionar el Estado para poder generar los gráficos', function() {	    
+					$('#id_cod_estado').select2('open');
+				});
+			}
+            else {
+				if (tipo != 4) {
+					var data_send = {'id_inst':institucion,'csrfmiddlewaretoken': "{{ csrf_token }}",
+										'tipo':tipo, 'from_date':desde, 'to_date':hasta }
+				}else {
+					//sub_titulo = sub_titulo+" (Estatus: "+estatus+")"
+					var data_send = {'id_inst':institucion,'csrfmiddlewaretoken': "{{ csrf_token }}", 'estado':estado,
+									'tipo':tipo, 'from_date':desde, 'to_date':hasta }
+				}
+				
+				$.post('',data_send, function(data) {
+
+					var lista_json = []
+                    var lista_json2 = []
+                    var total_can = 0;
+                    $.each(data, function(i){
+                        cand = []
+                        total_can += data[i].total    
+                    })
+                    var voto_cand = 0;
+                    $.each(data, function(i, obj){
+						if (tipo == 1) {
+							cand = []
+							if (data[i].sexo == '1'){
+                                cand[0] = 'Femenino'
+                            }
+                            else{
+                                cand[0] =('Masculino')
+                            }
+                            //cand[0] = data[i].sexo
+                            cand[1] = data[i].total
+                            
+                            cand2 =[]
+                            if (data[i].sexo == '1'){
+                                cand2[0] = 'Femenino '+'('+data[i].total+')'
+                            }
+                            else{
+                                cand2[0] = 'Masculino '+'('+data[i].total+')'
+                            }
+							cand2[1] = parseFloat(((data[i].total * 100)/(total_can)).toFixed(2));
+							porcentaje = cand2[1]
+						}
+						else if (tipo == 2) {
+							cand = []
+                            cand[0] = data[i].descripcion
+                            cand[1] = data[i].total
+                            
+                            cand2 =[]
+                            cand2[0] = data[i].descripcion+' ('+data[i].total+')'
+                            cand2[1] = parseFloat(((data[i].total * 100)/(total_can)).toFixed(2));
+                            porcentaje = cand2[1]
+
+						}
+						else if (tipo == 3) {
+							cand = []
+                            cand[0] = data[i].motivo
+                            cand[1] = data[i].total
+                            
+                            cand2 =[]
+                            cand2[0] = data[i].motivo+' ('+data[i].total+')'
+                            cand2[1] = parseFloat(((data[i].total * 100)/(total_can)).toFixed(2));
+                            porcentaje = cand2[1]
+
+						}
+						else if (tipo == 4) {
+							cand = []
+                            cand[0] = data[i].municipio
+                            cand[1] = data[i].total
+                            
+                            cand2 =[]
+                            cand2[0] = data[i].municipio+' ('+data[i].total+')'
+                            cand2[1] = parseFloat(((data[i].total * 100)/(total_can)).toFixed(2));
+                            porcentaje = cand2[1]
+						}
+						else if (tipo == 5) {
+							cand = []
+                            cand[0] = data[i].ocupacion
+                            cand[1] = data[i].total
+                            
+                            cand2 =[]
+                            cand2[0] = data[i].ocupacion+' ('+data[i].total+')'
+                            cand2[1] = parseFloat(((data[i].total * 100)/(total_can)).toFixed(2));
+                            porcentaje = cand2[1]
+						}
+						else if (tipo == 6) {
+							cand = []
+                            cand[0] = data[i].tipo
+                            cand[1] = data[i].total
+                            
+                            cand2 =[]
+                            cand2[0] = data[i].tipo+' ('+data[i].total+')'
+                            cand2[1] = parseFloat(((data[i].total * 100)/(total_can)).toFixed(2));
+                            porcentaje = cand2[1]
+						}
+						else if (tipo == 7) {
+							cand = []
+                            cand[0] = data[i].organizacion
+                            cand[1] = data[i].total
+                            
+                            cand2 =[]
+                            cand2[0] = data[i].organizacion+' ('+data[i].total+')'
+                            cand2[1] = parseFloat(((data[i].total * 100)/(total_can)).toFixed(2));
+                            porcentaje = cand2[1]
+						}
+						else if (tipo == 8) {
+							cand = []
+                            cand[0] = data[i].sector
+                            cand[1] = data[i].total
+                            
+                            cand2 =[]
+                            cand2[0] = data[i].sector+' ('+data[i].total+')'
+                            cand2[1] = parseFloat(((data[i].total * 100)/(total_can)).toFixed(2));
+                            porcentaje = cand2[1]
+						}
+						lista_json.push(cand);
+                        lista_json2.push(cand2);
+                    })
+                    
+                    if (lista_json != '' ) {
+                        
+                        $('#container1').highcharts({
+                        
+                            chart: {
+                                plotBackgroundColor: null,
+                                plotBorderWidth: null,
+                                plotShadow: false,
+                            },
+                            title: {
+                                text: titulo,
+                            },
+							subtitle: {
+                                text: sub_titulo
+                            },
+                            tooltip: {
+                                pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+                            },
+                            plotOptions: {
+                                pie: {
+                                    allowPointSelect: true,
+                                    cursor: 'pointer',
+                                    dataLabels: {
+                                        enabled: true,
+                                        format: '<b>Visitas</b>: (<span style="color:#FF0000">{point.y}</span>)  {point.percentage:.2f} %',
+                                        style: {
+                                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                                            }
+                                    },
+                                    showInLegend: true
+                                }
+                            },
+                            series: [{
+                                type: 'pie',
+                                name: 'Porcentaje de Visitas',
+                                data: lista_json,
+                            }]
+                        });
+                        console.log(lista_json2)
+                        $('#container2').highcharts({
+                            chart: {
+                                type: 'column'
+                            },
+                            title: {
+                                text: titulo,
+                            },
+                            subtitle: {
+                                text: sub_titulo
+                            },
+                            xAxis: {
+                                type: 'category'
+                            },
+                            yAxis: {
+                                title: {
+                                    text: ''
+                                    //texto lateral                                    
+                                }
+                            },
+                            legend: {
+                                enabled: false
+                            },
+                            plotOptions: {
+                                series: {
+                                    borderWidth: 0,
+                                    dataLabels: {
+                                        enabled: true,
+                                        format: '<span style="color:#FF0000">{point.y}</span> %',
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b><br/>'
+                            },
+            
+                            series: [{
+                                name: 'Brands',
+                                colorByPoint: true,
+                                data: lista_json2,
+                            }], 
+                        });
+                    }
+                    else{
+                        bootbox.alert('Disculpe aun no hay registros para esta fecha o institución', function() {	    
+                            $('#container1,#container2').html('')
+                        });
+
+                    }
+                },'json');
+                
+            }
+        })
+		$('#exportar_ficha_personal').click(function(){
+			
+			
+			var tipo = $('#id_tipo_ficha').find('option').filter(':selected').val()
+			var institucion = $('#institucion').find('option').filter(':selected').val()
+			var cedula = $('#id_persona').find('option').filter(':selected').val()
+			var desde = $('#from_date').val()
+			var hasta = $('#to_date').val()
+			
+			
+			if (tipo == 0) {
+				bootbox.alert('Debe indicar el tipo el Reporte a generar', function() {;
+					$('#id_tipo_ficha').select2('open');
+				});
+			}
+			else if ((tipo == 1) && ($('#from_date').val() == '')) {
+				bootbox.alert('Debe indicar Desde que Fecha quiere el Reporte', function() {	    
+					$('#from_date').css('border','1px solid #66AFE9');
+					$('#from_date').focus();
+				});
+			}
+			else if ((tipo == 1) && ($('#to_date').val() == '')) {
+				bootbox.alert('Debe indicar Hasta que Fecha quiere el Reporte', function() {	    
+					$('#to_date').css('border','1px solid #66AFE9');
+					$('#to_date').focus();
+				});
+			}
+			else if ((tipo == 1) && (institucion == 0)) {
+                bootbox.alert('Debe Seleccionar la Institución para poder generar el Reporte', function() {	    
+					$('#institucion').select2('open');
+				});
+            }else if (cedula == 0) {
+                bootbox.alert('Debe Seleccionar a la persona para poder generar el Reporte ', function() {
+					$('.nav-tabs a[href=#tabs_C]').tab('show') ;
+					$('#id_persona').select2('open');
+				});
+			}else {
+				if (tipo == 1)   {
+					var url = 'ficha/?cedula='+cedula+'&id_inst='+institucion+'&desde='+desde+'&hasta='+hasta+'&tipo='+tipo
+				}else if (tipo == 2)  {
+					var url = 'ficha/?cedula='+cedula
+				}
+				window.open(url); 
+			}
+			
+        });
+		
+    })
+</script>
+
+
+
+<body>
+    <div style="width: 100%;text-transform:uppercase;box-shadow: 0 1px 5px rgba(0,0,0,.85); text-align: center" class="panel panel-primary">
+        <div class="panel-heading" style="font-size: 150%;">
+			Generación de Reportes (Contro de Visitas) 
+        </div>
+		
+        <div class="panel-body " style="text-align: left;font-weight: bold">
+			<fieldset><legend class="titulo">Seleccione rango de fecha y tipo de reporte</legend></fieldset>
+            <div class="form-group col-xs-1">Desde:</div>
+            <div class="form-group col-xs-2">
+				<input id="from_date" placeholder="Seleccione Fecha Inicial" contenteditable="false" type="text">
+            </div>
+			<div class="form-group col-xs-1">Hasta:</div>
+            <div class="form-group col-xs-2">
+				<input id="to_date" placeholder="Seleccione Fecha Final" contenteditable="false" type="text">
+            </div>
+			<div class="col-xs-1">
+				Institución
+            </div>
+            <div class="col-xs-5">
+				
+				<select style="width: 100%;font-weight:bold;font-size: 13px" id="institucion" name='institucion'>
+					<option value='0'>Seleccione</option>
+					{% for ins in institucion %}
+					<option value='{{ins.id}}'>{{ins.nom_institucion}}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<br/>
+			<br/>
+			<br/>
+			<ul class="nav nav-tabs">
+				<li class="active" id="#tabs_2" data-toggle="popover" data-trigger="focus" title="Gráficas" data-content='Gráficas' data-placement="top">
+					<a data-toggle="tab" href="#tabs_A">Gráficas </a>
+				</li>
+				<li  data-toggle="popover" data-trigger="focus" title="Reporte en PDF" data-content="Reporte en PDF" data-placement="top">
+					<a data-toggle="tab" href="#tabs_B">Reporte en PDF</a>
+				</li>
+				<li  data-toggle="popover" data-trigger="focus" title="Ficha personal en PDF" data-content="Reporte en PDF" data-placement="top">
+					<a data-toggle="tab" href="#tabs_C">Ficha personal en PDF</a>
+				</li>
+				
+				
+			</ul>
+			
+			
+			<div class="tab-content">
+				<div id="tabs_A" class="tab-pane fade in active">
+					<br/>
+					<br/>
+					<div class="col-xs-1">Tipo</div>
+					<div class="col-xs-3">
+						<select style="width: 100%;font-weight:bold;font-size: 13px" id="id_tipo" name='tipo'>
+							<option value=0>Seleccione</option>
+							<option value=1>GÉNERO</option>
+							<option value=2>GRUPO ETAREO</option>
+							<option value=3>MOTIVO</option>
+							<option value=4>MUNICIPIO</option>
+							<option value=5>OCUPACIÓN</option>
+							<option value=6>NIVEL DE INSTRUCCIÓN</option>
+							<option value=7>ORGANIZACIÓN</option>
+							<option value=8>SECTOR LABORAL</option>
+						</select>
+					</div>
+					<div class="col-xs-1" ><label>Estados:</label></div>
+					<div class="col-xs-3">
+						<select style="width:100%;" class="form-control input-sm" id="id_cod_estado_1" >
+							<option value="0">Seleccione</option>
+							{% for e in list_estados %}
+							<option value="{{e.cod_estado}}">{{ e.estado }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-xs-2">
+						<button role="button" id="grafico_visitas" style="font-weight: bold;" class="btn btn-primary">
+							<i class="fa fa-bar-chart"></i>&nbsp;Generar&nbsp;
+						</button>
+					</div>
+					<br/>
+					<br/>
+					<br/>
+					<div id="id_graficas" style="width: 100%">
+						<div style="float: left;width: 100%;">
+							<div id="container1" style="min-width: 400px; height: 600px; max-width: 800px; margin: 0 auto"></div>
+						</div>
+						<br/>
+						<br/>
+						<div style="float: left;width: 100%;">
+							<div id="container2" style="min-width: 600px; height: 400px; max-width: 800px; margin: 0 auto"></div>
+						</div>
+					</div>
+					<div style="width: 50%">
+						<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+					</div>
+					
+				</div>
+			<div id="tabs_B" class="tab-pane fade">
+				<br/>
+				<br/>
+				<div class="col-xs-1">Tipo</div>
+				<div class="col-xs-3">
+					<select style="width: 100%;font-weight:bold;font-size: 13px" id="id_tipo_2" name='tipo' >
+						<option value=0>Seleccione</option>
+						<option value=1>GÉNERO</option>
+						<option value=2>GRUPO ETAREO</option>
+						<option value=3>MOTIVO</option>
+						<option value=4>MUNICIPIO</option>
+						<option value=5>OCUPACIÓN</option>
+						<option value=6>NIVEL DE INSTRUCCIÓN</option>
+						<option value=7>ORGANIZACIÓN</option>
+						<option value=8>SECTOR LABORAL</option>
+						<option value=9>DEPARTAMENTOS</option>
+						<option value=10>TOTAL POR VISITAS</option>
+						<option value=11>TOTAL POR PERSONAS</option>
+						<option value=12>LISTADO CENTRO DE VOTACION </option>
+						<option value=13>TWITTER</option>
+						<option value=14>TOTAL GENERAL</option>
+					</select>
+				</div>
+				<div class="form-group col-xs-1"><label>Sexo</label></div>
+				<div class="form-group col-xs-3">
+					<select style="width: 100%;font-weight:bold;font-size: 13px" id="id_sexo" disabled=disabled>
+						<option value='0'>Seleccione</option>
+						<option value='1'>Femenino</option>
+						<option value='2'>Masculino</option>
+					</select>
+				</div>
+				<div class="form-group col-xs-1"><label>Grupo Etáreo</label></div>
+				<div class="form-group col-xs-3">
+					<select style="width: 100%;font-weight:bold;font-size: 13px" id="id_grupo" disabled=disabled>
+						<option value='0'>Seleccione</option>
+						{% for gr in list_grupos %}
+						<option value="{{gr.id}}">{{gr.descripcion}} ({{gr.desde}}-{{gr.hasta}} Años)</option>
+						{% endfor %}
+						
+					</select>
+				</div>
+				<br/>
+				<br/>
+				<br/>
+				<div class="form-group col-xs-1"><label>Motivo</label></div>
+				<div class="form-group col-xs-3">
+					<select style="width:100%; " class="form-control input-sm" id="motivo" name="motivo" disabled=disabled >
+						<option value="0">Seleccione</option>
+						{% for q in listado_motivos %}
+						<option value="{{q.id}}">{{q.motivo}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="col-xs-1" ><label>Estados</label></div>
+				<div class="col-xs-3">
+					<select style="width:100%;" class="form-control input-sm" id="id_cod_estado" disabled=disabled>
+						<option value="0">Seleccione</option>
+						{% for e in list_estados %}
+						<option value="{{e.cod_estado}}">{{ e.estado }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="col-xs-1" ><label>Municipio</label></div>
+				<div class="col-xs-3">
+					<select style="width:100%;" id="id_cod_municipio" disabled=disabled>
+						<option value="0">Seleccione</option>
+					</select>
+				</div>
+				<br/>
+				<br/>
+				<br/>
+				<div class="form-group col-xs-1"><label>Ocupación</label></div>
+				<div class="form-group col-xs-3">
+					<select style="width:100%;" id="id_ocupacion" disabled=disabled>
+						<option value="0">Seleccione</option>
+						{% for o in listado_ocupaciones %}
+						<option value="{{o.id}}">{{o.ocupacion}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="form-group col-xs-1"><label>Educación</label></div>
+				<div class="form-group col-xs-3">
+					<select style="width:100%;" id="id_tipo_e" disabled=disabled>
+						<option value="0">Seleccione</option>
+						{% for t in listado_niveles %}
+						<option value="{{t.id}}">{{t.tipo}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="form-group col-xs-1"><label>Org. Social</label></div>
+				<div class="form-group col-xs-3">
+					<select style="width:100%;" id="id_organizacion" disabled=disabled>
+						<option value="0">Seleccione</option>
+						{% for or in listado_organizaciones %}
+						<option value="{{or.id}}">{{or.organizacion}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<br/>
+				<br/>
+				<br/>
+				<div class="form-group col-xs-1"><label>Sector</label></div>
+				<div class="form-group col-xs-3">
+					<select style="width:100%;" id="id_sector_lab" disabled=disabled>
+						<option value="0">Seleccione</option>
+						{% for sl in listado_sectores %}
+						<option value="{{sl.id}}">{{sl.sector}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="form-group col-xs-1"><label>Dpto. </label></div>
+				<div class="col-xs-3">
+					<select id="dependencia" class="form-control select2 input-sm" style="width: 100%"  disabled=disabled>
+						<option value="0" selected="selected">Seleccione</option>
+					</select>
+					
+				</div>
+				<br/>
+				<br/>
+				&nbsp;&nbsp;&nbsp;
+
+				<button role="button" id="exportar_general" style="font-weight: bold;"  class="btn btn-primary">
+					<i class="fa fa-file-pdf-o"></i>&nbsp;Generar PDF 
+				</button>
+				<br><br>
+			</div>
+			<div id="tabs_C" class="tab-pane fade">
+				<br/>
+				<br/>
+				<div class="col-xs-1">Tipo</div>
+				<div class="col-xs-3">
+					<select style="width: 100%;font-weight:bold;font-size: 13px" id="id_tipo_ficha" >
+						<option value=0>SELECCIONE</option>
+						<option value=1>ESPECIFICO</option>
+						<option value=2>GENERAL</option>
+					</select>
+				</div>
+				<div class="form-group col-xs-1"><label>Persona</label></div>
+				<div class="form-group col-xs-3">
+					<select style="width: 100%;font-weight:bold;font-size: 13px" id="id_persona" >
+						<option value='0'>Seleccione</option>
+						{% for per in listado_personas %}
+						<option value="{{per.cedula}}">{{per.cedula}} - {{per.nombre}} {{per.apellido}}</option>
+						{% endfor %}
+						
+					</select>
+				</div>
+
+
+				<button role="button" id="exportar_ficha_personal" style="font-weight: bold;"  class="btn btn-primary">
+					<i class="fa fa-file-pdf-o"></i>&nbsp;Generar PDF 
+				</button>
+			</div>
+    </div>
+    <br><br>
+    
+    
+</body>
+</html>
+
+{% endblock %}
+
+
+
